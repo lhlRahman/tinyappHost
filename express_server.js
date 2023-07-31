@@ -1,47 +1,35 @@
-// Import required modules and set up the app
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const cookieSession = require("cookie-session");
-const app = express();
 const { getUserByEmail, generateRandomString, idLookup, urlsForUser } = require("./helpers");
-const PORT = 8080; // default port 8080
+const fs = require("fs");
+const path = require("path");
+const app = express();
+const PORT = 8080;
 
-// Set the view engine to EJS
 app.set("view engine", "ejs");
-
-// Middleware for parsing URL-encoded bodies and setting up cookie sessions
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieSession({
   name: "session",
   keys: ["key1", "key2"],
 }));
 
-// Database to store shortened URLs
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  },
+// Function to read data from a JSON file
+const readJsonFile = function(filename) {
+  const data = fs.readFileSync(filename, "utf8");
+  return JSON.parse(data);
 };
 
-// Database to store user information
-const users = {
-  userID: {
-    id: "userID",
-    email: "user1@example.com",
-    password: bcrypt.hashSync("123", 10),
-  },
-  user2ID: {
-    id: "user2ID",
-    email: "user2@example.com",
-    password: bcrypt.hashSync("test", 10),
-  },
+const writeJsonFile = function(filename, data) {
+  const jsonData = JSON.stringify(data, null, 2);
+  fs.writeFileSync(filename, jsonData, "utf8");
 };
 
+// Database to store shortened URLs (read from urlDatabase.json)
+const urlDatabase = readJsonFile("urlDatabase.json");
+
+// Database to store user information (read from users.json)
+const users = readJsonFile("users.json");
 // --- ROUTES ---
 
 // Root route; redirect to login if not logged in, otherwise redirect to /urls
@@ -109,6 +97,10 @@ app.post("/register", (req, res) => {
       email: registerEmail,
       password: bcrypt.hashSync(registerPassword, 10),
     };
+
+    // Write the updated users object to users.json
+    writeJsonFile(path.join(__dirname, "users.json"), users);
+
     req.session.userid = id;
     res.redirect("/urls");
   } else {
@@ -168,6 +160,10 @@ app.post("/urls", (req, res) => {
       longURL: formattedURL,
       userID: req.session.userid,
     };
+
+    // Write the updated urlDatabase object to urlDatabase.json
+    writeJsonFile(path.join(__dirname, "urlDatabase.json"), urlDatabase);
+
     res.redirect(`/urls/${shortURL}`);
   } else {
     res.status(204).send("No Content, Make Sure You Type A URL Before Submitting!");
@@ -240,6 +236,10 @@ app.post("/urls/:id/delete", (req, res) => {
     res.status(403).send("You do not have permission to delete this URL.");
   } else {
     delete urlDatabase[shortURL];
+
+    // Write the updated urlDatabase object to urlDatabase.json
+    writeJsonFile(path.join(__dirname, "urlDatabase.json"), urlDatabase);
+
     res.redirect("/urls");
   }
 });

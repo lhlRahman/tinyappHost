@@ -1,0 +1,12 @@
+{
+  "userID": {
+    "id": "userID",
+    "email": "user1@example.com",
+    "password": "$2b$10$E9hzqZq9e41mpktsBkL/cuMOM0XZ.w/.WT21Lp.1L7qVNKpObq/6u"
+  },
+  "user2ID": {
+    "id": "aJ48lW",
+    "email": "user2@example.com",
+    "password": "$2b$10$QiDjIeBcGv.u0/baIjTkIOtXBN1mq75aJPgFQg04aKAlw5D6hSKJ6"
+  }
+}

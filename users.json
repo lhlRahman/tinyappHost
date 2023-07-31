@@ -1,17 +1,14 @@
 {
-  "userID": {
-    "id": "userID",
+  "userID1": {
+    "id": "userID1",
     "email": "user1@example.com",
     "password": "$2b$10$E9hzqZq9e41mpktsBkL/cuMOM0XZ.w/.WT21Lp.1L7qVNKpObq/6u",
+    "ip": "ip address"
   },
-  "user2ID": {
-    "id": "aJ48lW",
+  "userID2": {
+    "id": "userID2",
     "email": "user2@example.com",
-    "password": "$2b$10$QiDjIeBcGv.u0/baIjTkIOtXBN1mq75aJPgFQg04aKAlw5D6hSKJ6"
-  },
-  "cNTz6x": {
-    "id": "cNTz6x",
-    "email": "use34r@example.com",
-    "password": "$2a$10$TWMDnzcanJ.1rBQhD/fbc.UY/uageIiu71nkN4vdSE83Is/S4t2XW"
+    "password": "$2b$10$KbDSqZq9e41mpktsBkL/cuMOM0XZ.w/.WT21Lp.1L7qVNKpObq/6u",
+    "ip": "ip address"
   }
 }

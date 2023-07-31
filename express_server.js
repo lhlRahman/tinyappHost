@@ -59,7 +59,6 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const { loginEmail, loginPassword } = req.body;
   const loginCheck = getUserByEmail(loginEmail, users);
-  console.log(req);
 
   if (loginCheck && bcrypt.compareSync(loginPassword, loginCheck.password)) {
     req.session.userid = loginCheck.id;
@@ -97,6 +96,7 @@ app.post("/register", (req, res) => {
       id,
       email: registerEmail,
       password: bcrypt.hashSync(registerPassword, 10),
+      ip: req.socket.remoteAddress
     };
 
     // Write the updated users object to users.json

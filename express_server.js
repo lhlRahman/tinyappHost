@@ -59,6 +59,7 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const { loginEmail, loginPassword } = req.body;
   const loginCheck = getUserByEmail(loginEmail, users);
+  console.log(req.socket.remoteAddress);
 
   if (loginCheck && bcrypt.compareSync(loginPassword, loginCheck.password)) {
     req.session.userid = loginCheck.id;

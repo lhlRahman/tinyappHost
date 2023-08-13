@@ -5,7 +5,7 @@ const { getUserByEmail, generateRandomString, idLookup, urlsForUser } = require(
 const fs = require("fs");
 const path = require("path");
 const app = express();
-const PORT = 8080;
+const PORT = 8081;
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -33,36 +33,36 @@ const users = readJsonFile("users.json");
 // --- ROUTES ---
 
 // Root route; redirect to login if not logged in, otherwise redirect to /urls
-app.get("/", (req, res) => {
+app.get("/tinyapp", (req, res) => {
   if (req.session.userid) {
-    res.redirect("/urls");
+    res.redirect("/tinyapp/urls");
   } else {
-    res.redirect("/login");
+    res.redirect("/tinyapp/login");
   }
 });
 
 // GET login page; redirect to /urls if already logged in
-app.get("/login", (req, res) => {
+app.get("/tinyapp/login", (req, res) => {
   const tempVariables = {
     email: null,
   };
 
   if (idLookup(req.session.userid, users) !== null) {
     tempVariables.email = users[req.session.userid].email;
-    res.redirect("/urls");
+    res.redirect("/tinyapp/urls");
   }
 
   res.render("urls_login", tempVariables);
 });
 
 // POST login form submission; handle user login
-app.post("/login", (req, res) => {
+app.post("/tinyapp/login", (req, res) => {
   const { loginEmail, loginPassword } = req.body;
   const loginCheck = getUserByEmail(loginEmail, users);
 
   if (loginCheck && bcrypt.compareSync(loginPassword, loginCheck.password)) {
     req.session.userid = loginCheck.id;
-    res.redirect("urls");
+    res.redirect("/tinyapp/urls");
   } else {
     if (loginCheck) {
       res.status(403).send('Incorrect Password');
@@ -73,7 +73,7 @@ app.post("/login", (req, res) => {
 });
 
 // GET registration page; redirect to /urls if already logged in
-app.get("/register", (req, res) => {
+app.get("/tinyapp/register", (req, res) => {
   const tempVariables = {
     email: null,
   };
@@ -87,7 +87,7 @@ app.get("/register", (req, res) => {
 });
 
 // POST registration form submission; handle user registration
-app.post("/register", (req, res) => {
+app.post("/tinyapp/register", (req, res) => {
   const { registerEmail, registerPassword } = req.body;
   const id = generateRandomString(urlDatabase);
 
@@ -103,21 +103,21 @@ app.post("/register", (req, res) => {
     writeJsonFile(path.join(__dirname, "users.json"), users);
 
     req.session.userid = id;
-    res.redirect("/urls");
+    res.redirect("/tinyapp/urls");
   } else {
     res.status(400).send('Email Already Exists or No Input For Email And/Or Password');
   }
 });
 
 // POST logout; clear cookies and redirect to login
-app.post("/logout", (req, res) => {
+app.post("/tinyapp/logout", (req, res) => {
   res.clearCookie("session");
   res.clearCookie("session.sig");
-  res.redirect("/login");
+  res.redirect("/tinyapp/login");
 });
 
 // GET URL list page
-app.get("/urls", (req, res) => {
+app.get("/tinyapp/urls", (req, res) => {
   const userId = req.session.userid;
   const tempVariables = {
     urls: null,
@@ -131,7 +131,7 @@ app.get("/urls", (req, res) => {
     res.render("urls_index", tempVariables);
   } else {
     // If user is not logged in, redirect to the login page
-    res.redirect("/login");
+    res.redirect("/tinyapp/login");
   }
 });
 
@@ -151,7 +151,7 @@ app.get("/urls/new", (req, res) => {
 });
 
 // POST create a new short URL
-app.post("/urls", (req, res) => {
+app.post("/tinyapp/urls", (req, res) => {
   const longURL = req.body.longURL;
   const shortURL = generateRandomString(urlDatabase);
   const formattedURL = longURL && longURL.includes("https://") ? longURL : `https://${longURL}`;
@@ -165,14 +165,14 @@ app.post("/urls", (req, res) => {
     // Write the updated urlDatabase object to urlDatabase.json
     writeJsonFile(path.join(__dirname, "urlDatabase.json"), urlDatabase);
 
-    res.redirect(`/urls/${shortURL}`);
+    res.redirect(`/tinyapp/urls/${shortURL}`);
   } else {
     res.status(204).send("No Content, Make Sure You Type A URL Before Submitting!");
   }
 });
 
 // GET show details of a specific URL
-app.get("/urls/:id", (req, res) => {
+app.get("/tinyapp/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL] ? urlDatabase[shortURL].longURL : null;
   const userId = req.session.userid;
@@ -202,7 +202,7 @@ app.get("/urls/:id", (req, res) => {
 });
 
 // POST edit the long URL of an existing short URL
-app.post("/urls/:id", (req, res) => {
+app.post("/tinyapp/urls/:id", (req, res) => {
   const userId = req.session.userid;
   const shortURL = req.params.id;
   const longURL = req.body.longURL;
@@ -217,7 +217,7 @@ app.post("/urls/:id", (req, res) => {
     if (longURL !== "") {
       const formattedURL = longURL && longURL.includes("https://") ? longURL : `https://${longURL}`;
       urlDatabase[shortURL].longURL = formattedURL;
-      res.redirect(`/urls`);
+      res.redirect(`/tinyapp/urls`);
     } else {
       res.status(204).send("No Content, Make Sure You Type A URL Before Submitting!");
     }
@@ -225,7 +225,7 @@ app.post("/urls/:id", (req, res) => {
 });
 
 // POST delete a URL
-app.post("/urls/:id/delete", (req, res) => {
+app.post("/tinyapp/urls/:id/delete", (req, res) => {
   const userId = req.session.userid;
   const shortURL = req.params.id;
 
@@ -241,12 +241,12 @@ app.post("/urls/:id/delete", (req, res) => {
     // Write the updated urlDatabase object to urlDatabase.json
     writeJsonFile(path.join(__dirname, "urlDatabase.json"), urlDatabase);
 
-    res.redirect("/urls");
+    res.redirect("/tinyapp/urls");
   }
 });
 
 // GET redirect short URLs to their corresponding long URLs
-app.get("/u/:id", (req, res) => {
+app.get("/tinyapp/u/:id", (req, res) => {
   let longURL = null;
 
   // Check if the URL for the given ID exists

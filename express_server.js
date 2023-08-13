@@ -5,7 +5,7 @@ const { getUserByEmail, generateRandomString, idLookup, urlsForUser } = require(
 const fs = require("fs");
 const path = require("path");
 const app = express();
-const PORT = 8081;
+const PORT = 8080;
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
